@@ -25,7 +25,7 @@ using System.Net.Sockets;
 using System.Security.Claims;
 
 var builder = WebApplication.CreateBuilder(args);
-
+builder.Configuration.AddJsonFile("Secrets.json", optional: true, reloadOnChange: true);
 #region Log Region
 // Configure Serilog
 var logDir = builder.Configuration["LoggingOptions:LogDirectory"] ?? "logs";
@@ -347,8 +347,8 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
 builder.WebHost.ConfigureKestrel(serverOptions =>
 {
     serverOptions.AddServerHeader = false;
-    //serverOptions.Limits.MaxRequestBodySize = 1073741824; // 1 GB in bytes
-    serverOptions.Limits.MaxRequestBodySize = null; // 1 GB in bytes
+    var maxRequestBodySize = builder.Configuration.GetValue<long>("ApplicationSettings:MaxRequestBodySize");
+    serverOptions.Limits.MaxRequestBodySize = maxRequestBodySize; // 1 GB in bytes
 });
 
 builder.Services.AddScoped<CustomAuthenticationEvents>();
