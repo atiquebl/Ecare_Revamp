@@ -1,0 +1,146 @@
+﻿@page
+@model LoginModel
+
+@{
+    ViewData["Title"] = "Log in";
+}
+
+<style>
+    #squareContainer {
+        display: flex;
+    }
+
+    #login-image img {
+        height: 100%;
+        width: auto;
+        object-fit: cover;
+        display: block;
+    }
+    #login-form {
+        flex: 1;
+        background-color: #f5f5f5;
+        padding: 1rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        border-top-right-radius: 15px;
+        border-bottom-right-radius: 15px;
+    }
+
+    #square {
+        box-sizing: border-box;
+    }
+
+    canvas {
+        border-top-left-radius: 15px;
+        border-bottom-left-radius: 15px;
+        border-top-right-radius: 15px;
+        border-bottom-right-radius: 15px;
+    }
+    
+
+    /* Hide the eye icon in Edge and IE */
+    input[type="password"]::-ms-reveal,
+    input[type="password"]::-ms-clear {
+        display: none;
+    }
+
+    /* Hide the eye icon in Chrome, Firefox, and other modern browsers */
+    input[type="password"]::-webkit-credentials-auto-fill-button {
+        display: none;
+    }
+
+</style>
+
+
+
+<div class="container col-xl-10 col-xxl-8 pe-4" style="margin: 0 auto !important;">
+    <div class="row text-center text-center justify-content-around align-items-center">
+        <img src="/images/EBL_logo.jpeg" alt="EASTERN BANK PLC." style="width: 250px !important;" class="mb-2" />
+        <h3 class="text-warning">E-Care Web Portal</h3>
+        <h5>Login to your account</h5>
+    </div>
+    <div class="row align-items-center py-5 gx-0">
+        <div class="col-md-5 col-lg-6 m-0 d-none d-md-block">
+            <div id="sqaureContainer" class="h-100">
+                <div id="square" class="border bg-body-tertiary p-0 m-0" style="border-top-right-radius:15px;border-top-left-radius:15px;border-bottom-right-radius:15px;border-bottom-left-radius:15px;overflow: clip !important;object-fit: cover;height: 48vh;">
+                    <img src="/images/EBL_ART.png" alt="EASTERN BANK PLC. E-CARE WEB PORTAL" style="width: 100%;object-fit: cover;">
+                </div>
+            </div>
+        </div>
+        @* <div class="col-md-6 col-lg-6 m-0" id="formDiv"> *@
+        <div class="col-md-6 p-0 d-flex align-items-center" id="formDiv">
+            <form id="account" method="post" class="w-100 p-4 p-md-4 border bg-body-tertiary" style="border-top-right-radius:15px;border-top-left-radius:15px;border-bottom-right-radius:15px;border-bottom-left-radius:15px;height: 48vh;">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <div class="form-floating mb-3">
+                    <input asp-for="Input.Username" class="form-control" autocomplete="username" aria-required="true" id="username-field"/>
+                    <label asp-for="Input.Username" class="form-label"></label>
+                    <span asp-validation-for="Input.Username" class="text-danger"></span>
+                </div>
+                <div class="input-group mb-3">
+                    <div class="form-floating flex-grow-1">
+                        <input asp-for="Input.Password" class="form-control" autocomplete="off" aria-required="true" aria-describedby="show-pass" type="password" id="password-field" />
+                        <label asp-for="Input.Password" class="form-label"></label>
+                        <span asp-validation-for="Input.Password" class="text-danger"></span>
+                    </div>
+                   <button class="btn btn-outline-light d-none" style="border:1px solid #ced4da;" data-bs-toggle="button" type="button" id="show-pass"><span class="bi bi-eye" id="togglePassword"></span></button>
+                </div>
+                <input type="number" name="Input.Loginfailed"  class="d-none" value="@(Model.Input?.Loginfailed ?? 0)" />
+                <button id="login-submit" type="submit" class="w-100 mt-4 btn btn-lg bg-secondary text-light">Log in</button>
+            </form>
+        </div> 
+    </div>
+</div>
+@if (!string.IsNullOrEmpty(Model.ErrorMessage))
+{
+    <div class="alert alert-danger">@Model.ErrorMessage</div>
+}
+@section Scripts {
+    <script type="text/javascript">
+        document.addEventListener("DOMContentLoaded", function () {
+            var usernameInput = document.getElementById('username-field');
+            if (usernameInput) {
+                usernameInput.addEventListener('input', function () {
+                    this.value = this.value.toLowerCase();
+                });
+            }
+        });
+    </script>
+    <script type="text/javascript">
+         window.addEventListener('resize', function () {
+             var formDiv = document.getElementById('formDiv');
+             var square = document.getElementById('square');
+             var sqaureContainer = document.getElementById('sqaureContainer');
+             square.style.height = formDiv.offsetHeight + 'px';
+             square.style.width = formDiv.offsetWidth + 'px';
+             sqaureContainer.style.height = formDiv.offsetHeight + 'px';
+             sqaureContainer.style.width = formDiv.offsetWidth + 'px'; 
+         });
+
+        $("document").ready(() => { 
+            const PassBtn = document.querySelector('#show-pass');
+            const passwordInput = document.querySelector('#password-field');
+
+            $('#password-field').on("keyup", () => { 
+                if ($('#password-field').val().trim() !== "") {
+                    $('#show-pass').removeClass("d-none"); 
+                } else { 
+                    $('#show-pass').addClass("d-none"); 
+                } 
+            }); 
+
+            PassBtn.addEventListener('click', () => { 
+                const input = document.querySelector('#password-field');
+                input.getAttribute('type') === 'password' ? input.setAttribute('type', 'text') : input.setAttribute('type', 'password');
+
+                if (input.getAttribute('type') === 'text') {
+                    PassBtn.innerHTML = '<i class="bi bi-eye-slash"></i>';
+                } else {
+                    PassBtn.innerHTML = '<i class="bi bi-eye" aria-hidden="true"></i>';
+                }
+            }); 
+        });
+    </script>
+
+    <partial name="_ValidationScriptsPartial" />
+}

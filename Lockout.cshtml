@@ -1,0 +1,13 @@
+﻿@page
+@model LockoutModel
+@{
+    ViewData["Title"] = "Locked out";
+}
+
+<header>
+    <h1 class="text-danger">@ViewData["Title"]</h1>
+    <p class="text-danger">This account has been locked out, please try again later.</p>
+    <form method="post" class="mt-4">
+        <a href="/Identity/Account/Login" class="btn btn-primary">Go back to Login Page</a>
+    </form>
+</header>

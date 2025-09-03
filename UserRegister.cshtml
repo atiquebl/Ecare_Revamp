@@ -1,0 +1,100 @@
+﻿@page "{sucessResult:bool?}"
+@using ECare_Revamp.Models;
+@model UserRegistrationModel
+
+@{
+    ViewData["Title"] = "User Registration Management";
+}
+<div class="">
+
+    <h1 class="display-5">User Registration Management</h1>
+    @if (!string.IsNullOrEmpty(Model.AlertMessage))
+    {
+        <script>
+            alert("@Model.AlertMessage");
+        </script>
+    }
+    <div class="card text-center text-sm-start">
+        <div class="row g-0 align-items-center">
+            <div class="col-12 col-sm-12 order-2 order-sm-1 p-4">
+                <form method="post" class="form-group">
+                    <label class="form-label">Search User</label>
+                    <div class="hstack gap-1">
+                        <input type="text" value="" placeholder="Employee ID or Email Address" asp-for="SearchObject" class="form-control" />
+                        <button class="btn btn-outline-warning bg-primary py-0" id="userregistration-submit" asp-page-handler="SearchObject" type="submit" height="100%" width="100%"><i class="bi bi-search"></i></button>
+                    </div>
+                </form>
+                <div class="mt-4 table-responsive">
+                    @if (Model.ADObjDTOs != null && Model.ADObjDTOs.Count > 0)
+                    {
+                        <table class="table table-hover text-center table-bordered" style="border-radius:15px;">
+                            <thead class="bg-primary">
+                                <tr>
+                                    <td>@Html.DisplayNameFor(model => model.ADObjDTOs[0].EmployeeID)</td>
+                                    <td>@Html.DisplayNameFor(model => model.ADObjDTOs[0].Email)</td>
+                                    <td>@Html.DisplayNameFor(model => model.ADObjDTOs[0].GivenName)</td>
+                                    <td>@Html.DisplayNameFor(model => model.ADObjDTOs[0].Surname)</td>
+                                    <td>Role</td>
+                                    <td>Action</td>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (ADObjDTO item in Model.ADObjDTOs)
+                                {
+                                    <tr>
+                                        <td>@Html.DisplayFor(modelItem => item.EmployeeID)</td>
+                                        <td>@Html.DisplayFor(modelItem => item.Email)</td>
+                                        <td>@Html.DisplayFor(modelItem => item.GivenName)</td>
+                                        <td>@Html.DisplayFor(modelItem => item.Surname)</td>
+                                         <form method="post">
+                                            <td>
+                                            <select name="RoleId" class="form-select">
+                                                <option value="">Select Role</option>
+                                                @foreach (var role in Model._roles.OrderBy(r => r.Name))
+                                                {
+                                                    <option value="@role.Id">@role?.Name?.ToUpper()</option>
+                                                }
+                                            </select>
+                                        </td>
+
+                                        <td style="display:none">
+                                            <input hidden readonly aria-hidden="true" asp-for="EmployeeID" value="@item.EmployeeID" />
+                                        </td>
+                                        <td>
+                                            <button class="btn btn-outline-danger @(Model.existingUser?.Exists(e=> e.Email == item.Email) ?? false ? "disabled text-muted": "")" id="create-submit" type="submit" asp-page-handler="Create">Add User</button>
+                                        </td>
+                                        </form>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    }
+                </div>
+                @if (TempData.Peek("SuccessFlag") != null)
+                {
+                    if (bool.TryParse(TempData.Peek("SuccessFlag")?.ToString(), out bool flag) ? flag : false == true)
+                    {
+                        @*<div class="alert alert-success mt-3" role="alert">
+                            User Create Successfully.
+                        </div> 
+                         <div class="container-fluid">
+                            <div class="row d-flex justify-content-center align-items-center">
+                                <a class="btn btn-secondary w-25" asp-page="./UserRegister">Go Back</a>
+                            </div>
+                        </div> *@
+                    }
+                    else
+                    {
+                        <div class="alert alert-danger my-1" role="alert">
+                            <div asp-validation-summary="ModelOnly" class="text-danger">Error occured</div>
+                        </div>
+                    }
+                }
+    
+                <div class="d-flex justify-content-center mt-4">
+                    <a href="/index" class="btn btn-primary">Go back to Home Page</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
