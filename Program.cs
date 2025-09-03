@@ -235,7 +235,17 @@ builder.Services.AddTransient<OracleConnection>(sp =>
     return new OracleConnection(_UBS_DB_LinkConnectionString);
 
 });
+builder.Services.AddTransient<OracleConnection>(sp =>
+{
+    string? _ATMConnectionString = builder.Configuration.GetConnectionString("ATM") ?? throw new InvalidOperationException("Connection string 'ATM' not found.");
 
+    if (string.IsNullOrEmpty(_ATMConnectionString))
+    {
+        throw new InvalidOperationException("The connection string 'ATM' is not configured.");
+    }
+    return new OracleConnection(_ATMConnectionString);
+
+});
 
 #endregion
 
@@ -246,7 +256,7 @@ builder.Services.AddIdentity<ECare_User, IdentityRole>(options =>
 {
     options.SignIn.RequireConfirmedAccount = false;
     options.Lockout.MaxFailedAccessAttempts = 3;
-    options.Lockout.DefaultLockoutTimeSpan = TimeSpan.MaxValue;
+    options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(15);
     options.Lockout.AllowedForNewUsers = true;
 
 }).AddEntityFrameworkStores<ApplicationDbContext>().AddDefaultTokenProviders();
@@ -281,7 +291,8 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.Cookie.SameSite = SameSiteMode.Strict;
     options.Cookie.Name = "__Ecare-cc";
     options.CookieManager = new ChunkingCookieManager();
-    var protector = DataProtectionProvider.Create("Ebl@012345!Ecare@12345678#");
+    var dataProtectionKey = builder.Configuration["DataProtection:Key"] ?? throw new InvalidOperationException("DataProtection key not found in configuration.");
+    var protector = DataProtectionProvider.Create(dataProtectionKey);
     options.TicketDataFormat = new SecureDataFormat<AuthenticationTicket>(
             new TicketSerializer(),
             protector.CreateProtector("Authentication.CookieAuthentication")
