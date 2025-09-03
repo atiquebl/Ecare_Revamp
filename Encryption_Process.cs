@@ -11,8 +11,13 @@ namespace ECare_Revamp.Script
 {
     public class Encryption_Process
     {
-        public string EncryptionKey = "MAKV2SPBNI99212";
-       
+        private readonly string _encryptionKey;
+        public Encryption_Process(IConfiguration configuration)
+        {
+            _encryptionKey = configuration.GetValue<string>("Encryption:Key")
+                             ?? throw new InvalidOperationException("Encryption key not found in configuration.");
+        }
+
         #region Decryption Methods
         public string DecryptString(string key, string cipherText)
         {
@@ -45,7 +50,7 @@ namespace ECare_Revamp.Script
             byte[] clearBytes = Encoding.UTF8.GetBytes(encryptString);
             using (Aes encryptor = Aes.Create())
             {
-                var pdb = new Rfc2898DeriveBytes(EncryptionKey, new byte[] { 0x49, 0x76, 0x61, 0x6e, 0x20, 0x4d, 0x65, 0x64, 0x76, 0x65, 0x64, 0x65, 0x76 }, 10000, HashAlgorithmName.SHA256);
+                var pdb = new Rfc2898DeriveBytes(_encryptionKey, new byte[] { 0x49, 0x76, 0x61, 0x6e, 0x20, 0x4d, 0x65, 0x64, 0x76, 0x65, 0x64, 0x65, 0x76 }, 10000, HashAlgorithmName.SHA256);
                 encryptor.Key = pdb.GetBytes(32);
                 encryptor.GenerateIV();
                 byte[] iv = encryptor.IV;

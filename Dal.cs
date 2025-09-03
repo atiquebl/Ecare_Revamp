@@ -14,23 +14,23 @@ namespace ECare_Revamp.Models
                 ?? throw new InvalidOperationException("Connection string 'ATM' not found.");
         }
 
-        public string InsertProcedure(string textDetails)
+        public async Task<string> InsertProcedure(string textDetails)
         {
             try
             {
-                using (var conn = new OracleConnection(_connectionString))
-                using (var cmd = conn.CreateCommand())
+                await using (var conn = new OracleConnection(_connectionString))
+                await using (var cmd = conn.CreateCommand())
                 {
-                    conn.OpenAsync();
+                    await conn.OpenAsync();
 
                     cmd.CommandText = "update NDC_WATCH_CONFIG set load_master_key_flag = '1' where terminal_atm_number = :terminal";
                     cmd.CommandType = CommandType.Text;
 
                     cmd.Parameters.Add(new OracleParameter("terminal", OracleDbType.Varchar2, textDetails, ParameterDirection.Input));
 
-                    cmd.ExecuteNonQueryAsync();
-                    conn.CloseAsync();
-                    conn.DisposeAsync();
+                    await cmd.ExecuteNonQueryAsync();
+                    await conn.CloseAsync();
+                    await conn.DisposeAsync();
                 }
                 return ""; // success
             }
@@ -40,14 +40,14 @@ namespace ECare_Revamp.Models
                 return ex.Message;
             }
         }
-        public string InsertTerminal(string terminalAtmNumber, string reason, string userId)
+        public async Task<string> InsertTerminal(string terminalAtmNumber, string reason, string userId)
         {
             try
             {
-                using (var conn = new OracleConnection(_connectionString))
-                using (var cmd = conn.CreateCommand())
+                await using (var conn = new OracleConnection(_connectionString))
+                await using (var cmd = conn.CreateCommand())
                 {
-                    conn.OpenAsync();
+                    await conn.OpenAsync();
 
                     cmd.CommandText = "Master_key_chang_log.insert_user_log";
                     cmd.CommandType = CommandType.StoredProcedure;
@@ -56,9 +56,9 @@ namespace ECare_Revamp.Models
                     cmd.Parameters.Add(new OracleParameter("p_reason", OracleDbType.Varchar2, reason, ParameterDirection.Input));
                     cmd.Parameters.Add(new OracleParameter("P_termid", OracleDbType.Varchar2, userId, ParameterDirection.Input));
 
-                    cmd.ExecuteNonQueryAsync();
-                    conn.CloseAsync();
-                    conn.DisposeAsync();
+                    await cmd.ExecuteNonQueryAsync();
+                    await conn.CloseAsync();
+                    await conn.DisposeAsync();
                 }
                 return ""; // success
             }
