@@ -19,19 +19,25 @@ namespace ECare_Revamp.Script
         }
 
         #region Decryption Methods
-        public string DecryptString(string key, string cipherText)
+        public string DecryptString(string cipherText)
         {
             byte[] fullCipher = Convert.FromBase64String(cipherText);
             using (Aes aes = Aes.Create())
             {
-                var pdb = new Rfc2898DeriveBytes(key, new byte[] { 0x49, 0x76, 0x61, 0x6e, 0x20, 0x4d, 0x65, 0x64, 0x76, 0x65, 0x64, 0x65, 0x76 }, 10000, HashAlgorithmName.SHA256);
+                //var pdb = new Rfc2898DeriveBytes(_encryptionKey, new byte[] { 0x49, 0x76, 0x61, 0x6e, 0x20, 0x4d, 0x65, 0x64, 0x76, 0x65, 0x64, 0x65, 0x76 }, 10000, HashAlgorithmName.SHA256);
+                byte[] salt = new byte[16];
+                Array.Copy(fullCipher, 0, salt, 0, salt.Length);
+
+                var pdb = new Rfc2898DeriveBytes(_encryptionKey, salt, 120000, HashAlgorithmName.SHA256);
                 aes.Key = pdb.GetBytes(32);
 
                 byte[] iv = new byte[16];
-                Array.Copy(fullCipher, 0, iv, 0, iv.Length);
+               // Array.Copy(fullCipher, 0, iv, 0, iv.Length);
+                Array.Copy(fullCipher, salt.Length, iv, 0, iv.Length);
                 aes.IV = iv;
 
-                int cipherTextStartIndex = iv.Length;
+                //int cipherTextStartIndex = iv.Length;
+                int cipherTextStartIndex = salt.Length + iv.Length;
                 int cipherTextLength = fullCipher.Length - cipherTextStartIndex;
 
                 using (var ms = new MemoryStream(fullCipher, cipherTextStartIndex, cipherTextLength))
@@ -50,13 +56,21 @@ namespace ECare_Revamp.Script
             byte[] clearBytes = Encoding.UTF8.GetBytes(encryptString);
             using (Aes encryptor = Aes.Create())
             {
-                var pdb = new Rfc2898DeriveBytes(_encryptionKey, new byte[] { 0x49, 0x76, 0x61, 0x6e, 0x20, 0x4d, 0x65, 0x64, 0x76, 0x65, 0x64, 0x65, 0x76 }, 10000, HashAlgorithmName.SHA256);
+                //var pdb = new Rfc2898DeriveBytes(_encryptionKey, new byte[] { 0x49, 0x76, 0x61, 0x6e, 0x20, 0x4d, 0x65, 0x64, 0x76, 0x65, 0x64, 0x65, 0x76 }, 10000, HashAlgorithmName.SHA256);
+                byte[] salt = new byte[16];
+                using (var rng = RandomNumberGenerator.Create())
+                {
+                    rng.GetBytes(salt);
+                }
+
+                var pdb = new Rfc2898DeriveBytes(_encryptionKey, salt, 120000, HashAlgorithmName.SHA256);
                 encryptor.Key = pdb.GetBytes(32);
                 encryptor.GenerateIV();
                 byte[] iv = encryptor.IV;
 
                 using (var ms = new MemoryStream())
                 {
+                    ms.Write(salt, 0, salt.Length); // Prepend salt
                     ms.Write(iv, 0, iv.Length); // Prepend IV
                     using (var cs = new CryptoStream(ms, encryptor.CreateEncryptor(), CryptoStreamMode.Write))
                     {

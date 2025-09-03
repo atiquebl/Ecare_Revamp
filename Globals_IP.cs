@@ -53,17 +53,12 @@ namespace ECare_Revamp.Models
             Core_Db_User = DecryptValue("DB_Details:Core_Db_User");
             Core_Db_Password = DecryptValue("DB_Details:Core_Db_Password");
         }
-        private string GetEncryptionKey()
-        {
-            // Assuming the encryption key is stored in the configuration
-            return _config.GetValue<string>("Encryption:Key") ?? throw new InvalidOperationException("Encryption key is not configured.");
-        }
         private string DecryptValue(string key)
         {
             var raw = _config.GetValue<string>(key);
             return string.IsNullOrEmpty(raw)
                 ? string.Empty
-                : _encryption.DecryptString(GetEncryptionKey(), raw);
+                : _encryption.DecryptString( raw);
         }
         //public static readonly String Switch_IP = "192.168.2.72";
         //public static readonly String Switch_User = "pwrcard";
